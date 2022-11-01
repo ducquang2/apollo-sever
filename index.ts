@@ -3,23 +3,31 @@ const { startStandaloneServer } = require('@apollo/server/standalone');
 
 
 const books = [
-    {
-      title: 'The Awakening',
-      author: 'Kate Chopin',
-    },
-    {
-      title: 'City of Glass',
-      author: 'Paul Auster',
-    },
-  ];
+  {
+    id: 1,
+    title: 'The Awakening',
+    author: 'Kate Chopin',
+  },
+  {
+    id: 2,
+    title: 'City of Glass',
+    author: 'Paul Auster',
+  },
+];
 
-  const typeDefs = `#graphql
+const typeDefs = `#graphql
   # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
   # This "Book" type defines the queryable fields for every book in our data source.
   type Book {
+    id: ID
     title: String
     author: String
+  }
+
+  type Mutation {
+    addBook(id: ID, title: String!, author: String!): Book
+    updateBook(title: String!, author: String): Book
   }
 
   # The "Query" type is special: it lists all of the available queries that
@@ -32,26 +40,29 @@ const books = [
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
 const resolvers = {
-    Query: {
-      books: () => books,
-    },
-  };
-
-
+  Query: {
+    books: () => books,
+  },
+  Mutation: {
+    addBook: (parent, args, context, info) =>{
+      const results = [...books, args]
+      return args
+    }
+  }
+};
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
 const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-  });
-  
-  // Passing an ApolloServer instance to the `startStandaloneServer` function:
-  //  1. creates an Express app
-  //  2. installs your ApolloServer instance as middleware
-  //  3. prepares your app to handle incoming requests
-  startStandaloneServer(server, {
-    listen: { port: 4000 },
-  }).then(({url}) => console.log(`🚀  Server ready at: ${url}`))
-  
-  
+  typeDefs,
+  resolvers,
+});
+
+// Passing an ApolloServer instance to the `startStandaloneServer` function:
+//  1. creates an Express app
+//  2. installs your ApolloServer instance as middleware
+//  3. prepares your app to handle incoming requests
+startStandaloneServer(server, {
+  listen: { port: 4000 },
+}).then(({ url }) => console.log(`🚀  Server ready at: ${url}`))
+
