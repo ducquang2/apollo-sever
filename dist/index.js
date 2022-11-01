@@ -2,10 +2,12 @@ const { ApolloServer } = require('@apollo/server');
 const { startStandaloneServer } = require('@apollo/server/standalone');
 const books = [
     {
+        id: 1,
         title: 'The Awakening',
         author: 'Kate Chopin',
     },
     {
+        id: 2,
         title: 'City of Glass',
         author: 'Paul Auster',
     },
@@ -15,8 +17,14 @@ const typeDefs = `#graphql
 
   # This "Book" type defines the queryable fields for every book in our data source.
   type Book {
+    id: ID
     title: String
     author: String
+  }
+
+  type Mutation {
+    addBook(id: ID, title: String!, author: String!): Book
+    updateBook(title: String!, author: String): Book
   }
 
   # The "Query" type is special: it lists all of the available queries that
@@ -24,14 +32,19 @@ const typeDefs = `#graphql
   # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
     books: [Book]
-  }
-`;
+  }`;
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
 const resolvers = {
     Query: {
         books: () => books,
     },
+    Mutation: {
+        addBook: (parent, args, context, info) => {
+            const results = [...books, args];
+            return args;
+        }
+    }
 };
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
